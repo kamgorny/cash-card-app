@@ -13,7 +13,8 @@ import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
 
 @Configuration
-class SecurityConfig {
+class SecurityConfig
+{
 
     @Bean
     SecurityFilterChain filterChain(HttpSecurity http) throws Exception
@@ -35,9 +36,10 @@ class SecurityConfig {
 
     //UserDetailsService for test purposes
     @Bean
-    UserDetailsService testOnlyUsers(PasswordEncoder passwordEncoder) {
+    UserDetailsService testOnlyUsers(PasswordEncoder passwordEncoder)
+    {
         User.UserBuilder users = User.builder();
-        UserDetails sarah = users
+        UserDetails jack = users
                 .username("jack1")
                 .password(passwordEncoder.encode("abc123"))
                 .roles("CARD-OWNER") // new role
@@ -47,6 +49,11 @@ class SecurityConfig {
                 .password(passwordEncoder.encode("qrs456"))
                 .roles("NON-OWNER") // new role
                 .build();
-        return new InMemoryUserDetailsManager(sarah, hankOwnsNoCards);
+        UserDetails dude = users
+                .username("dude1")
+                .password(passwordEncoder.encode("xyz789"))
+                .roles("CARD-OWNER")
+                .build();
+        return new InMemoryUserDetailsManager(jack, hankOwnsNoCards, dude);
     }
 }

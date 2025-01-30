@@ -29,9 +29,15 @@ class CashCardController
     @GetMapping("/{requestedId}")
     private ResponseEntity<CashCard> findById(@PathVariable Long requestedId, Principal principal)
     {
-        Optional<CashCard> cashCardOptional = Optional.ofNullable(cashCardRepository.findByIdAndOwner(requestedId, principal.getName()));
+        CashCard cashCard = findCashCard(requestedId, principal);
 
-        return cashCardOptional.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
+        if (cashCard != null)
+        {
+            return ResponseEntity.ok(cashCard);
+        } else
+        {
+            return ResponseEntity.notFound().build();
+        }
     }
 
     @GetMapping()
@@ -59,8 +65,9 @@ class CashCardController
     }
 
     @PutMapping("/{requestedId}")
-    private ResponseEntity<Void> putCashCard(@PathVariable Long requestedId, @RequestBody CashCard cashCardUpdate, Principal principal) {
-        CashCard foundCashCard = cashCardRepository.findByIdAndOwner(requestedId, principal.getName());
+    private ResponseEntity<Void> putCashCard(@PathVariable Long requestedId, @RequestBody CashCard cashCardUpdate, Principal principal)
+    {
+        CashCard foundCashCard = findCashCard(requestedId, principal);
         if(foundCashCard != null)
         {
             cashCardRepository.save(new CashCard(foundCashCard.id(), cashCardUpdate.amount(), principal.getName()));
@@ -70,6 +77,21 @@ class CashCardController
         {
             return ResponseEntity.notFound().build();
         }
+    }
 
+    @DeleteMapping("/{id}")
+    private ResponseEntity<Void> deleteCashCard(@PathVariable Long id, Principal principal)
+    {
+        if(cashCardRepository.existsByIdAndOwner(id, principal.getName()))
+        {
+            cashCardRepository.deleteById(id);
+            return ResponseEntity.noContent().build();
+        }
+        return  ResponseEntity.notFound().build();
+    }
+
+    private CashCard findCashCard(Long requestedId, Principal principal)
+    {
+        return cashCardRepository.findByIdAndOwner(requestedId, principal.getName());
     }
 }

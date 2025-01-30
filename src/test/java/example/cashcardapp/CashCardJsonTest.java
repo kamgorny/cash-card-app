@@ -40,7 +40,10 @@ class CashCardJsonTest
     @Test
     void cashCardSerializationTest() throws IOException
     {
+        //given
         CashCard cashCard = new CashCard(99L, 123.45, "jack1");
+
+        //when & then
         assertThat(json.write(cashCard)).isStrictlyEqualToJson("single.json");
         assertThat(json.write(cashCard)).hasJsonPathNumberValue("@.id");
         assertThat(json.write(cashCard)).extractingJsonPathNumberValue("@.id")
@@ -56,6 +59,7 @@ class CashCardJsonTest
     @Test
     void cashCardDeserializationTest() throws IOException
     {
+        //given
         String expected = """
                 {
                     "id": 99,
@@ -63,6 +67,8 @@ class CashCardJsonTest
                     "owner": "jack1"
                 }
                 """;
+
+        //when & then
         assertThat(json.parse(expected))
                 .isEqualTo(new CashCard(99L, 123.45, "jack1"));
         assertThat(json.parseObject(expected).id()).isEqualTo(99);
@@ -72,11 +78,14 @@ class CashCardJsonTest
     @Test
     void cashCardListSerializationTest() throws IOException
     {
+        //given, when & then
         assertThat(jsonList.write(cashCards)).isStrictlyEqualToJson("list.json");
     }
 
     @Test
-    void cashCardListDeserializationTest() throws IOException {
+    void cashCardListDeserializationTest() throws IOException
+    {
+        //given
         String expected="""
          [
               { "id": 99, "amount": 123.45 , "owner": "jack1"},
@@ -84,6 +93,8 @@ class CashCardJsonTest
               { "id": 101, "amount": 150.00, "owner": "jack1" }
          ]
          """;
+
+        //when & then
         assertThat(jsonList.parse(expected)).isEqualTo(cashCards);
     }
 }

@@ -145,25 +145,59 @@ class CashCardApplicationTests
 
 	@Test
 	@DirtiesContext
-	void putCashCard_shouldUpdateAnExistingCashCard() {
+	void putCashCard_shouldUpdateAnExistingCashCard()
+	{
+		//given
 		CashCard cashCardUpdate = new CashCard(null, 19.99, null);
-
 		HttpEntity<CashCard> request = new HttpEntity<>(cashCardUpdate);
+
+		//when
 		ResponseEntity<Void> response = restTemplate
 				.withBasicAuth("jack1", "abc123")
 				.exchange("/cashcards/99", HttpMethod.PUT, request, Void.class);
-		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
 
+
+		//then
 		ResponseEntity<String> getResponse = restTemplate
 				.withBasicAuth("jack1", "abc123")
 				.getForEntity("/cashcards/99", String.class);
-		assertThat(getResponse.getStatusCode()).isEqualTo(HttpStatus.OK);
+
 		DocumentContext documentContext = JsonPath.parse(getResponse.getBody());
 		Number id = documentContext.read("$.id");
 		Double amount = documentContext.read("$.amount");
+		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
+		assertThat(getResponse.getStatusCode()).isEqualTo(HttpStatus.OK);
 		assertThat(id).isEqualTo(99);
 		assertThat(amount).isEqualTo(19.99);
 	}
 
+	@Test
+	@DirtiesContext
+	void shouldDeleteAnExistingCashCard()
+	{
+		//given & when
+		ResponseEntity<Void> response = restTemplate
+				.withBasicAuth("jack1", "abc123")
+				.exchange("/cashcards/99", HttpMethod.DELETE, null, Void.class);
+
+		//then
+		ResponseEntity<String> getResponse = restTemplate
+				.withBasicAuth("jack1", "abc123")
+				.getForEntity("/cashcards/99", String.class);
+		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
+		assertThat(getResponse.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
+	}
+
+	@Test
+	void shouldNotDeleteACashCardThatDoesNotExist()
+	{
+		//given & when
+		ResponseEntity<Void> deleteResponse = restTemplate
+				.withBasicAuth("jack1", "abc123")
+				.exchange("/cashcards/99999", HttpMethod.DELETE, null, Void.class);
+
+		//then
+		assertThat(deleteResponse.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
+	}
 
 }
